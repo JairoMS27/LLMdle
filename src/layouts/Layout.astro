@@ -1,4 +1,6 @@
 ---
+import Analytics from '@vercel/analytics/astro';
+
 interface Props {
   title?: string;
 }
@@ -14,6 +16,8 @@ const { title = 'LLMdle - Daily LLM Guessing Game' } = Astro.props;
     <meta name="description" content="Guess the LLM model name in 6 tries. A daily word game for AI enthusiasts." />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title}</title>
+
+    <Analytics />
 
     <!-- Prevent flash of wrong theme -->
     <script is:inline>
