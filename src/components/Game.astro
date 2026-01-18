@@ -290,20 +290,16 @@ const { wordLength } = Astro.props;
     helpModal?.showModal();
   });
 
-  // Share button handler
-  document.getElementById('share-btn')?.addEventListener('click', async () => {
+  // Share button handler - Opens Twitter/X to post the result
+  document.getElementById('share-btn')?.addEventListener('click', () => {
     const shareText = generateShareText(
       getPuzzleNumber(),
       evaluatedGuesses.map(row => row.map(t => ({ char: t.char, state: t.state }))),
       gameState.status === GameStatus.WON
     );
 
-    try {
-      await navigator.clipboard.writeText(shareText);
-      showToast('Copied to clipboard!');
-    } catch {
-      showToast('Failed to copy');
-    }
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
+    window.open(twitterUrl, '_blank');
   });
 
   // Render stats modal

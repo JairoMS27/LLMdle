@@ -104,5 +104,5 @@ export function generateShareText(
     }).join('')
   ).join('\n');
 
-  return `${title} ${score}\n\n${grid}\n\nhttps://llmdle.com`;
+  return `${title} ${score}\n\n${grid}\n\nhttps://llmdle.vercel.app/`;
 }

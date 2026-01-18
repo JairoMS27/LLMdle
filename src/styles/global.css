@@ -96,6 +96,11 @@
   @apply border-2 border-base-content/40;
 }
 
+/* Dark mode button styles - white buttons */
+[data-theme="dark"] .btn-primary {
+  @apply bg-white text-black border-white hover:bg-gray-200 hover:border-gray-200;
+}
+
 /* Animations */
 @keyframes flip {
   0% {
