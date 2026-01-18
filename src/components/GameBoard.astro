@@ -1,0 +1,35 @@
+---
+import { MAX_ATTEMPTS } from '../lib/constants';
+
+interface Props {
+  wordLength: number;
+}
+
+const { wordLength } = Astro.props;
+
+// Calculate tile size based on word length for responsive design
+const getTileClasses = (length: number) => {
+  if (length <= 6) return 'w-12 h-12 sm:w-14 sm:h-14 text-xl';
+  if (length <= 10) return 'w-10 h-10 sm:w-12 sm:h-12 text-lg';
+  if (length <= 15) return 'w-8 h-8 sm:w-10 sm:h-10 text-base';
+  return 'w-6 h-6 sm:w-8 sm:h-8 text-sm';
+};
+
+const tileClasses = getTileClasses(wordLength);
+---
+
+<div id="game-board" class="flex flex-col gap-1 items-center" data-word-length={wordLength}>
+  {Array.from({ length: MAX_ATTEMPTS }).map((_, rowIndex) => (
+    <div data-row={rowIndex} class="flex gap-1">
+      {Array.from({ length: wordLength }).map((_, tileIndex) => (
+        <div
+          data-tile={tileIndex}
+          class:list={[
+            'flex items-center justify-center font-bold uppercase tile-empty rounded',
+            tileClasses
+          ]}
+        ></div>
+      ))}
+    </div>
+  ))}
+</div>

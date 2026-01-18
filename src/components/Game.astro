@@ -1,0 +1,342 @@
+---
+import GameBoard from './GameBoard.astro';
+import Keyboard from './Keyboard.astro';
+import StatsModal from './StatsModal.astro';
+import HelpModal from './HelpModal.astro';
+import Toast from './Toast.astro';
+
+interface Props {
+  wordLength: number;
+}
+
+const { wordLength } = Astro.props;
+---
+
+<div id="game-container" class="flex flex-col items-center gap-4" data-word-length={wordLength}>
+  <GameBoard wordLength={wordLength} />
+  <Keyboard />
+  <StatsModal />
+  <HelpModal />
+  <Toast />
+</div>
+
+<script>
+  import {
+    createNewGame,
+    addCharToGuess,
+    removeCharFromGuess,
+    submitGuess,
+    evaluateGuess,
+    getKeyboardStates,
+    type GameState
+  } from '../lib/game-logic';
+  import { loadGameState, saveGameState, loadStatistics, saveStatistics, type StoredTile } from '../lib/storage';
+  import { createEmptyStats, updateStatistics, generateShareText } from '../lib/statistics';
+  import { getPuzzleNumber, getTodayString, getDailyWord } from '../lib/daily-word';
+  import { GameStatus, TileState, MAX_ATTEMPTS, WIN_MESSAGES } from '../lib/constants';
+
+  // Game state
+  let gameState: GameState;
+  let evaluatedGuesses: StoredTile[][] = [];
+  let statistics = loadStatistics() || createEmptyStats();
+  let isRevealing = false;
+
+  // DOM elements
+  const board = document.getElementById('game-board');
+  const keyboard = document.getElementById('keyboard');
+  const toastContainer = document.getElementById('toast-container');
+  const statsModal = document.getElementById('stats-modal') as HTMLDialogElement | null;
+  const helpModal = document.getElementById('help-modal') as HTMLDialogElement | null;
+
+  // Get tile size classes based on word length
+  function getTileClasses(length: number): string {
+    if (length <= 6) return 'w-12 h-12 sm:w-14 sm:h-14 text-xl';
+    if (length <= 10) return 'w-10 h-10 sm:w-12 sm:h-12 text-lg';
+    if (length <= 15) return 'w-8 h-8 sm:w-10 sm:h-10 text-base';
+    return 'w-6 h-6 sm:w-8 sm:h-8 text-sm';
+  }
+
+  // Initialize game
+  function initGame() {
+    const saved = loadGameState();
+    if (saved && saved.state.dateString === getTodayString()) {
+      gameState = saved.state;
+      evaluatedGuesses = saved.evaluatedGuesses;
+    } else {
+      gameState = createNewGame();
+      evaluatedGuesses = [];
+    }
+    renderBoard();
+    renderKeyboard();
+
+    // Show stats if game already completed
+    if (gameState.status !== GameStatus.PLAYING) {
+      setTimeout(() => {
+        renderStatsModal();
+        statsModal?.showModal();
+      }, 500);
+    }
+  }
+
+  // Render the game board
+  function renderBoard() {
+    if (!board) return;
+
+    const wordLength = gameState.targetWord.length;
+    const tileClasses = getTileClasses(wordLength);
+    const rows = board.querySelectorAll('[data-row]');
+
+    rows.forEach((row, rowIndex) => {
+      const tiles = row.querySelectorAll('[data-tile]');
+
+      tiles.forEach((tile, tileIndex) => {
+        const tileEl = tile as HTMLElement;
+
+        if (rowIndex < evaluatedGuesses.length) {
+          // Completed guess
+          const result = evaluatedGuesses[rowIndex]?.[tileIndex];
+          if (result) {
+            tileEl.textContent = result.char;
+            tileEl.className = `flex items-center justify-center font-bold uppercase rounded tile-${result.state} ${tileClasses}`;
+          }
+        } else if (rowIndex === evaluatedGuesses.length) {
+          // Current guess row
+          const char = gameState.currentGuess[tileIndex] || '';
+          tileEl.textContent = char;
+          tileEl.className = `flex items-center justify-center font-bold uppercase rounded ${char ? 'tile-filled' : 'tile-empty'} ${tileClasses}`;
+        } else {
+          // Empty future row
+          tileEl.textContent = '';
+          tileEl.className = `flex items-center justify-center font-bold uppercase rounded tile-empty ${tileClasses}`;
+        }
+      });
+    });
+  }
+
+  // Render keyboard states
+  function renderKeyboard() {
+    if (!keyboard) return;
+
+    const states = getKeyboardStates(gameState.guesses, gameState.targetWord);
+    const keys = keyboard.querySelectorAll('[data-key]');
+
+    keys.forEach(key => {
+      const keyEl = key as HTMLElement;
+      const keyValue = keyEl.getAttribute('data-key')?.toLowerCase();
+      if (!keyValue || keyValue === 'enter' || keyValue === 'backspace') return;
+
+      const state = states[keyValue];
+      keyEl.classList.remove('key-correct', 'key-present', 'key-absent', 'key-unused');
+
+      if (state === TileState.CORRECT) {
+        keyEl.classList.add('key-correct');
+      } else if (state === TileState.PRESENT) {
+        keyEl.classList.add('key-present');
+      } else if (state === TileState.ABSENT) {
+        keyEl.classList.add('key-absent');
+      } else {
+        keyEl.classList.add('key-unused');
+      }
+    });
+  }
+
+  // Show toast notification
+  function showToast(message: string, duration = 2000) {
+    if (!toastContainer) return;
+
+    const toast = document.createElement('div');
+    toast.className = 'bg-base-content text-base-100 px-4 py-2 rounded-lg shadow-lg font-medium animate-bounce-in';
+    toast.textContent = message;
+    toastContainer.appendChild(toast);
+
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transition = 'opacity 0.3s ease-out';
+      setTimeout(() => toast.remove(), 300);
+    }, duration);
+  }
+
+  // Animate row shake for invalid guess
+  function shakeRow(rowIndex: number) {
+    const row = board?.querySelector(`[data-row="${rowIndex}"]`);
+    if (row) {
+      row.classList.add('animate-shake');
+      setTimeout(() => row.classList.remove('animate-shake'), 500);
+    }
+  }
+
+  // Animate tile flip reveal
+  function revealRow(rowIndex: number, tiles: StoredTile[]): Promise<void> {
+    return new Promise((resolve) => {
+      const row = board?.querySelector(`[data-row="${rowIndex}"]`);
+      if (!row) {
+        resolve();
+        return;
+      }
+
+      const tileEls = row.querySelectorAll('[data-tile]');
+      const wordLength = gameState.targetWord.length;
+      const tileClasses = getTileClasses(wordLength);
+
+      tileEls.forEach((tile, i) => {
+        const tileEl = tile as HTMLElement;
+        const result = tiles[i];
+        if (!result) return;
+
+        setTimeout(() => {
+          tileEl.classList.add('animate-flip');
+
+          setTimeout(() => {
+            tileEl.textContent = result.char;
+            tileEl.className = `flex items-center justify-center font-bold uppercase rounded tile-${result.state} ${tileClasses}`;
+            tileEl.classList.remove('animate-flip');
+          }, 250);
+        }, i * 150);
+      });
+
+      const totalTime = tiles.length * 150 + 300;
+      setTimeout(resolve, totalTime);
+    });
+  }
+
+  // Handle key input
+  async function handleInput(key: string) {
+    if (gameState.status !== GameStatus.PLAYING || isRevealing) return;
+
+    if (key === 'enter') {
+      const result = submitGuess(gameState);
+
+      if (result.error) {
+        showToast(result.error);
+        shakeRow(evaluatedGuesses.length);
+        return;
+      }
+
+      if (result.result) {
+        const newTiles = result.result.tiles.map(t => ({
+          char: t.char,
+          state: t.state
+        }));
+
+        isRevealing = true;
+        await revealRow(evaluatedGuesses.length, newTiles);
+
+        evaluatedGuesses.push(newTiles);
+        gameState = result.state;
+
+        saveGameState(gameState, evaluatedGuesses);
+        renderKeyboard();
+        isRevealing = false;
+
+        if (gameState.status === GameStatus.WON) {
+          const messageIndex = Math.min(evaluatedGuesses.length - 1, WIN_MESSAGES.length - 1);
+          showToast(WIN_MESSAGES[messageIndex] || 'You won!');
+          statistics = updateStatistics(statistics, GameStatus.WON, evaluatedGuesses.length);
+          saveStatistics(statistics);
+          setTimeout(() => {
+            renderStatsModal();
+            statsModal?.showModal();
+          }, 1500);
+        } else if (gameState.status === GameStatus.LOST) {
+          showToast(`The answer was: ${gameState.targetWord}`, 4000);
+          statistics = updateStatistics(statistics, GameStatus.LOST, MAX_ATTEMPTS);
+          saveStatistics(statistics);
+          setTimeout(() => {
+            renderStatsModal();
+            statsModal?.showModal();
+          }, 2000);
+        }
+      }
+    } else if (key === 'backspace') {
+      gameState = removeCharFromGuess(gameState);
+      renderBoard();
+    } else if (key.length === 1) {
+      gameState = addCharToGuess(gameState, key);
+      renderBoard();
+    }
+  }
+
+  // Event listeners for keyboard clicks
+  keyboard?.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    const keyButton = target.closest('[data-key]');
+    const key = keyButton?.getAttribute('data-key');
+    if (key) handleInput(key.toLowerCase());
+  });
+
+  // Event listeners for physical keyboard
+  document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (statsModal?.open || helpModal?.open) return;
+
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleInput('enter');
+    } else if (e.key === 'Backspace') {
+      e.preventDefault();
+      handleInput('backspace');
+    } else if (/^[a-zA-Z0-9-]$/.test(e.key)) {
+      handleInput(e.key.toLowerCase());
+    }
+  });
+
+  // Modal button handlers
+  document.getElementById('stats-btn')?.addEventListener('click', () => {
+    renderStatsModal();
+    statsModal?.showModal();
+  });
+
+  document.getElementById('help-btn')?.addEventListener('click', () => {
+    helpModal?.showModal();
+  });
+
+  // Share button handler
+  document.getElementById('share-btn')?.addEventListener('click', async () => {
+    const shareText = generateShareText(
+      getPuzzleNumber(),
+      evaluatedGuesses.map(row => row.map(t => ({ char: t.char, state: t.state }))),
+      gameState.status === GameStatus.WON
+    );
+
+    try {
+      await navigator.clipboard.writeText(shareText);
+      showToast('Copied to clipboard!');
+    } catch {
+      showToast('Failed to copy');
+    }
+  });
+
+  // Render stats modal
+  function renderStatsModal() {
+    const played = document.getElementById('stat-played');
+    const winRate = document.getElementById('stat-win-rate');
+    const currentStreak = document.getElementById('stat-current-streak');
+    const maxStreak = document.getElementById('stat-max-streak');
+
+    if (played) played.textContent = String(statistics.gamesPlayed);
+    if (winRate) winRate.textContent = String(statistics.gamesPlayed ? Math.round((statistics.gamesWon / statistics.gamesPlayed) * 100) : 0);
+    if (currentStreak) currentStreak.textContent = String(statistics.currentStreak);
+    if (maxStreak) maxStreak.textContent = String(statistics.maxStreak);
+
+    // Render distribution bars
+    const maxGuesses = Math.max(...statistics.guessDistribution, 1);
+    statistics.guessDistribution.forEach((count, i) => {
+      const bar = document.getElementById(`dist-bar-${i + 1}`);
+      if (bar) {
+        const width = Math.max((count / maxGuesses) * 100, 10);
+        bar.style.width = `${width}%`;
+        bar.textContent = String(count);
+
+        bar.classList.remove('bg-success', 'bg-base-300');
+        if (gameState.status === GameStatus.WON && evaluatedGuesses.length === i + 1) {
+          bar.classList.add('bg-success', 'text-white');
+        } else {
+          bar.classList.add('bg-base-300');
+        }
+      }
+    });
+  }
+
+  // Initialize on load
+  initGame();
+</script>

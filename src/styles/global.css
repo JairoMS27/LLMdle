@@ -1,0 +1,191 @@
+@import "tailwindcss";
+@plugin "daisyui" {
+  themes: light --default, dark --prefersdark;
+}
+
+@theme {
+  /* Custom theme colors */
+  --color-tile-correct: #22c55e;
+  --color-tile-present: #eab308;
+  --color-tile-absent: #6b7280;
+}
+
+/* Light theme overrides */
+[data-theme="light"] {
+  --fallback-b1: #ffffff;
+  --fallback-b2: #f3f4f6;
+  --fallback-b3: #e5e7eb;
+  --fallback-bc: #1f2937;
+  --fallback-su: #22c55e;
+  --fallback-wa: #eab308;
+  --fallback-er: #6b7280;
+}
+
+/* Dark theme overrides */
+[data-theme="dark"] {
+  --fallback-b1: #000000;
+  --fallback-b2: #000000;
+  --fallback-b3: #333333;
+  --fallback-bc: #ffffff;
+  --fallback-su: #22c55e;
+  --fallback-wa: #eab308;
+  --fallback-er: #4b5563;
+}
+
+/* Tile states - Light mode */
+.tile-empty {
+  @apply border-2 border-base-300 bg-base-100;
+}
+
+.tile-filled {
+  @apply border-2 border-base-content/30 bg-base-100;
+}
+
+/* Tile states - Dark mode: white background tiles */
+[data-theme="dark"] .tile-empty {
+  @apply border-2 border-white bg-white text-black;
+}
+
+[data-theme="dark"] .tile-filled {
+  @apply border-2 border-white bg-white text-black;
+}
+
+.tile-correct {
+  @apply bg-success text-white border-success;
+}
+
+.tile-present {
+  @apply bg-warning text-black border-warning;
+}
+
+.tile-absent {
+  @apply bg-base-content/40 text-white border-base-content/40;
+}
+
+/* Keyboard key states - Light mode */
+.key-unused {
+  @apply bg-base-200 text-base-content hover:bg-base-300 transition-colors;
+}
+
+/* Keyboard key states - Dark mode: white border */
+[data-theme="dark"] .key-unused {
+  @apply bg-transparent text-white border-2 border-white hover:bg-white/10 transition-colors;
+}
+
+.key-correct {
+  @apply bg-success text-white border-success;
+}
+
+.key-present {
+  @apply bg-warning text-black border-warning;
+}
+
+.key-absent {
+  @apply bg-base-content/40 text-white border-base-content/40;
+}
+
+[data-theme="dark"] .key-correct {
+  @apply border-2 border-success;
+}
+
+[data-theme="dark"] .key-present {
+  @apply border-2 border-warning;
+}
+
+[data-theme="dark"] .key-absent {
+  @apply border-2 border-base-content/40;
+}
+
+/* Animations */
+@keyframes flip {
+  0% {
+    transform: rotateX(0deg);
+  }
+  50% {
+    transform: rotateX(90deg);
+  }
+  100% {
+    transform: rotateX(0deg);
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  20%, 60% {
+    transform: translateX(-5px);
+  }
+  40%, 80% {
+    transform: translateX(5px);
+  }
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes bounce-in {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-flip {
+  animation: flip 0.5s ease-in-out forwards;
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+.animate-pop {
+  animation: pop 0.1s ease-in-out;
+}
+
+.animate-bounce-in {
+  animation: bounce-in 0.3s ease-out;
+}
+
+/* Staggered delay for row reveal */
+.tile-reveal-0 { animation-delay: 0ms; }
+.tile-reveal-1 { animation-delay: 150ms; }
+.tile-reveal-2 { animation-delay: 300ms; }
+.tile-reveal-3 { animation-delay: 450ms; }
+.tile-reveal-4 { animation-delay: 600ms; }
+.tile-reveal-5 { animation-delay: 750ms; }
+.tile-reveal-6 { animation-delay: 900ms; }
+.tile-reveal-7 { animation-delay: 1050ms; }
+.tile-reveal-8 { animation-delay: 1200ms; }
+.tile-reveal-9 { animation-delay: 1350ms; }
+.tile-reveal-10 { animation-delay: 1500ms; }
+.tile-reveal-11 { animation-delay: 1650ms; }
+.tile-reveal-12 { animation-delay: 1800ms; }
+.tile-reveal-13 { animation-delay: 1950ms; }
+.tile-reveal-14 { animation-delay: 2100ms; }
+.tile-reveal-15 { animation-delay: 2250ms; }
+.tile-reveal-16 { animation-delay: 2400ms; }
+.tile-reveal-17 { animation-delay: 2550ms; }
+.tile-reveal-18 { animation-delay: 2700ms; }
+.tile-reveal-19 { animation-delay: 2850ms; }
+.tile-reveal-20 { animation-delay: 3000ms; }
+.tile-reveal-21 { animation-delay: 3150ms; }
+.tile-reveal-22 { animation-delay: 3300ms; }
+.tile-reveal-23 { animation-delay: 3450ms; }
+.tile-reveal-24 { animation-delay: 3600ms; }

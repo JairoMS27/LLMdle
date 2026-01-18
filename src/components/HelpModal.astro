@@ -1,0 +1,71 @@
+---
+---
+
+<dialog id="help-modal" class="modal">
+  <div class="modal-box max-w-md">
+    <h3 class="font-bold text-lg mb-4">How To Play</h3>
+
+    <p class="mb-4">Guess the LLM model name in 6 tries.</p>
+
+    <ul class="list-disc list-inside mb-4 space-y-2 text-sm">
+      <li>Each guess must be a valid LLM model name</li>
+      <li>Names include letters, numbers, and hyphens (-)</li>
+      <li>The color of tiles changes to show how close your guess was</li>
+    </ul>
+
+    <div class="bg-base-200 p-3 rounded-lg mb-4">
+      <p class="text-sm font-medium mb-1">Format example:</p>
+      <code class="text-sm">gpt-5-2</code>, <code class="text-sm">claude-4-opus</code>, <code class="text-sm">gemini-2-5-pro</code>
+    </div>
+
+    <h4 class="font-bold text-sm mb-3">Color meanings</h4>
+
+    <div class="space-y-4">
+      <div>
+        <div class="flex gap-1 mb-2">
+          <div class="w-10 h-10 flex items-center justify-center font-bold rounded tile-correct text-white">G</div>
+          <div class="w-10 h-10 flex items-center justify-center font-bold rounded tile-empty">P</div>
+          <div class="w-10 h-10 flex items-center justify-center font-bold rounded tile-empty">T</div>
+          <div class="w-10 h-10 flex items-center justify-center font-bold rounded tile-empty">-</div>
+          <div class="w-10 h-10 flex items-center justify-center font-bold rounded tile-empty">5</div>
+        </div>
+        <p class="text-sm text-base-content/70"><span class="text-success font-bold">G</span> is in the word and in the correct spot.</p>
+      </div>
+
+      <div>
+        <div class="flex gap-1 mb-2">
+          <div class="w-10 h-10 flex items-center justify-center font-bold rounded tile-empty">C</div>
+          <div class="w-10 h-10 flex items-center justify-center font-bold rounded tile-present text-black">L</div>
+          <div class="w-10 h-10 flex items-center justify-center font-bold rounded tile-empty">A</div>
+          <div class="w-10 h-10 flex items-center justify-center font-bold rounded tile-empty">U</div>
+          <div class="w-10 h-10 flex items-center justify-center font-bold rounded tile-empty">D</div>
+        </div>
+        <p class="text-sm text-base-content/70"><span class="text-warning font-bold">L</span> is in the word but in the wrong spot.</p>
+      </div>
+
+      <div>
+        <div class="flex gap-1 mb-2">
+          <div class="w-10 h-10 flex items-center justify-center font-bold rounded tile-empty">G</div>
+          <div class="w-10 h-10 flex items-center justify-center font-bold rounded tile-empty">R</div>
+          <div class="w-10 h-10 flex items-center justify-center font-bold rounded tile-absent text-white">O</div>
+          <div class="w-10 h-10 flex items-center justify-center font-bold rounded tile-empty">K</div>
+          <div class="w-10 h-10 flex items-center justify-center font-bold rounded tile-empty">-</div>
+        </div>
+        <p class="text-sm text-base-content/70"><span class="font-bold">O</span> is not in the word in any spot.</p>
+      </div>
+    </div>
+
+    <div class="divider my-4"></div>
+
+    <p class="text-sm text-base-content/60">A new LLM model name will be available each day!</p>
+
+    <div class="modal-action">
+      <form method="dialog">
+        <button class="btn btn-primary">Got it!</button>
+      </form>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>

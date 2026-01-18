@@ -1,0 +1,31 @@
+---
+import { KEYBOARD_ROWS } from '../lib/constants';
+---
+
+<div id="keyboard" class="w-full max-w-lg mx-auto mt-4">
+  {KEYBOARD_ROWS.map((row, rowIndex) => (
+    <div class="flex justify-center gap-1 mb-1">
+      {row.map(key => {
+        const isEnter = key === 'ENTER';
+        const isBackspace = key === 'BACKSPACE';
+        const isSpecial = isEnter || isBackspace;
+        const displayText = isBackspace ? '⌫' : key.toUpperCase();
+
+        return (
+          <button
+            data-key={key.toLowerCase()}
+            class:list={[
+              'flex items-center justify-center font-bold rounded transition-colors select-none',
+              isSpecial
+                ? 'px-2 sm:px-3 py-3 text-xs sm:text-sm'
+                : 'w-7 h-11 sm:w-9 sm:h-12 text-sm sm:text-base',
+              'key-unused'
+            ]}
+          >
+            {displayText}
+          </button>
+        );
+      })}
+    </div>
+  ))}
+</div>

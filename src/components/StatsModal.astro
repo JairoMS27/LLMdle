@@ -1,0 +1,57 @@
+---
+---
+
+<dialog id="stats-modal" class="modal">
+  <div class="modal-box max-w-sm">
+    <h3 class="font-bold text-lg text-center mb-4">Statistics</h3>
+
+    <div class="grid grid-cols-4 gap-2 text-center mb-6">
+      <div>
+        <div id="stat-played" class="text-2xl sm:text-3xl font-bold">0</div>
+        <div class="text-xs text-base-content/60">Played</div>
+      </div>
+      <div>
+        <div id="stat-win-rate" class="text-2xl sm:text-3xl font-bold">0</div>
+        <div class="text-xs text-base-content/60">Win %</div>
+      </div>
+      <div>
+        <div id="stat-current-streak" class="text-2xl sm:text-3xl font-bold">0</div>
+        <div class="text-xs text-base-content/60">Current</div>
+      </div>
+      <div>
+        <div id="stat-max-streak" class="text-2xl sm:text-3xl font-bold">0</div>
+        <div class="text-xs text-base-content/60">Max</div>
+      </div>
+    </div>
+
+    <h4 class="font-bold text-sm mb-2">Guess Distribution</h4>
+    <div class="space-y-1">
+      {[1, 2, 3, 4, 5, 6].map(num => (
+        <div class="flex items-center gap-2">
+          <span class="w-4 text-sm font-medium">{num}</span>
+          <div
+            id={`dist-bar-${num}`}
+            class="h-5 bg-base-300 text-xs flex items-center justify-end pr-2 font-bold min-w-[24px] text-base-content rounded"
+          >
+            0
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <div class="modal-action justify-center gap-2 mt-6">
+      <button id="share-btn" class="btn btn-primary gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+        </svg>
+        Share
+      </button>
+      <form method="dialog">
+        <button class="btn">Close</button>
+      </form>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
