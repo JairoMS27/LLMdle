@@ -4,16 +4,10 @@ import Keyboard from './Keyboard.astro';
 import StatsModal from './StatsModal.astro';
 import HelpModal from './HelpModal.astro';
 import Toast from './Toast.astro';
-
-interface Props {
-  wordLength: number;
-}
-
-const { wordLength } = Astro.props;
 ---
 
-<div id="game-container" class="flex flex-col items-center gap-4" data-word-length={wordLength}>
-  <GameBoard wordLength={wordLength} />
+<div id="game-container" class="flex flex-col items-center gap-4">
+  <GameBoard />
   <Keyboard />
   <StatsModal />
   <HelpModal />
@@ -56,6 +50,30 @@ const { wordLength } = Astro.props;
     return 'w-6 h-6 sm:w-8 sm:h-8 text-sm';
   }
 
+  // Create the game board dynamically based on word length
+  function createBoard(wordLength: number) {
+    if (!board) return;
+
+    board.innerHTML = '';
+    board.setAttribute('data-word-length', String(wordLength));
+    const tileClasses = getTileClasses(wordLength);
+
+    for (let rowIndex = 0; rowIndex < MAX_ATTEMPTS; rowIndex++) {
+      const row = document.createElement('div');
+      row.setAttribute('data-row', String(rowIndex));
+      row.className = 'flex gap-1';
+
+      for (let tileIndex = 0; tileIndex < wordLength; tileIndex++) {
+        const tile = document.createElement('div');
+        tile.setAttribute('data-tile', String(tileIndex));
+        tile.className = `flex items-center justify-center font-bold uppercase tile-empty rounded ${tileClasses}`;
+        row.appendChild(tile);
+      }
+
+      board.appendChild(row);
+    }
+  }
+
   // Initialize game
   function initGame() {
     const saved = loadGameState();
@@ -66,6 +84,10 @@ const { wordLength } = Astro.props;
       gameState = createNewGame();
       evaluatedGuesses = [];
     }
+
+    // Create board dynamically based on today's word length
+    createBoard(gameState.targetWord.length);
+
     renderBoard();
     renderKeyboard();
 

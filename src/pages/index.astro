@@ -3,17 +3,16 @@ import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import Game from '../components/Game.astro';
 import Footer from '../components/Footer.astro';
-import { getPuzzleNumber, getTodayWordLength } from '../lib/daily-word';
+import { getPuzzleNumber } from '../lib/daily-word';
 
 const puzzleNumber = getPuzzleNumber();
-const wordLength = getTodayWordLength();
 ---
 
 <Layout>
   <div class="flex flex-col min-h-screen max-w-lg mx-auto px-4">
     <Header puzzleNumber={puzzleNumber} />
     <main class="flex-1 flex flex-col justify-center py-4">
-      <Game wordLength={wordLength} />
+      <Game />
     </main>
     <Footer />
   </div>
