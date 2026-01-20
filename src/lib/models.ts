@@ -62,6 +62,7 @@ export const MODELS_BY_PROVIDER: Record<string, string[]> = {
     "amazon-titan-text-lite"
   ],
   "GLM": [
+    "glm-4-7-flash",
     "glm-4-7",
     "glm-4-6",
     "glm-4-5",
