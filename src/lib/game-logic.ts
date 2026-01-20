@@ -1,5 +1,5 @@
 import { TileState, GameStatus, MAX_ATTEMPTS } from './constants';
-import { isValidGuess, VALID_CHARS } from './models';
+import { VALID_CHARS } from './models';
 import { getDailyWord, getTodayString } from './daily-word';
 
 export interface TileResult {
@@ -116,14 +116,6 @@ export function submitGuess(state: GameState): {
       state,
       result: null,
       error: `Guess must be ${state.targetWord.length} characters`
-    };
-  }
-
-  if (!isValidGuess(guess)) {
-    return {
-      state,
-      result: null,
-      error: 'Not a valid LLM model name'
     };
   }
 
